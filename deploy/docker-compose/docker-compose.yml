@@ -1,0 +1,82 @@
+version: "3.9"
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-devopsledger}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-devopsledger}
+      POSTGRES_DB: ${POSTGRES_DB:-devopsledger}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-devopsledger}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    volumes:
+      - redis_data:/data
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  api:
+    build:
+      context: ../../apps/api
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    environment:
+      DATABASE_URL: postgresql://${POSTGRES_USER:-devopsledger}:${POSTGRES_PASSWORD:-devopsledger}@postgres:5432/${POSTGRES_DB:-devopsledger}
+      REDIS_URL: redis://redis:6379
+      LOG_LEVEL: ${LOG_LEVEL:-info}
+      ENVIRONMENT: ${ENVIRONMENT:-production}
+      ENABLE_DOCS: ${ENABLE_DOCS:-false}
+    ports:
+      - "8000:8000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  web:
+    build:
+      context: ../../apps/web
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    environment:
+      API_URL: ${API_URL:-http://api:8000}
+    ports:
+      - "3000:3000"
+    depends_on:
+      - api
+
+  worker:
+    build:
+      context: ../../apps/worker
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    environment:
+      DATABASE_URL: postgresql://${POSTGRES_USER:-devopsledger}:${POSTGRES_PASSWORD:-devopsledger}@postgres:5432/${POSTGRES_DB:-devopsledger}
+      REDIS_URL: redis://redis:6379
+      LOG_LEVEL: ${LOG_LEVEL:-info}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+volumes:
+  postgres_data:
+  redis_data:

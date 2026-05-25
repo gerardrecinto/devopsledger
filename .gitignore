@@ -1,0 +1,40 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+dist/
+build/
+*.egg
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Node
+node_modules/
+.next/
+out/
+.npm
+
+# Environment — never commit secrets
+.env
+.env.local
+.env.*.local
+
+# Docker
+*.tar
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+.DS_Store
+
+# Terraform (future)
+*.tfstate
+*.tfstate.backup
+.terraform/
+*.tfplan
+*.tfplan.json
