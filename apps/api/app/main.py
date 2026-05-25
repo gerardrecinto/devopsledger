@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 
 from app.config import settings
-from app.routers import health
+from app.routers import decision_records, health
 
 app = FastAPI(
     title="DevOpsLedger API",
@@ -11,3 +11,4 @@ app = FastAPI(
 )
 
 app.include_router(health.router, tags=["system"])
+app.include_router(decision_records.router, tags=["decision-records"])
