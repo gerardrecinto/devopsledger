@@ -2,6 +2,8 @@
 
 **Open-source operational memory for GitOps teams.**
 
+![DevOpsLedger demo](docs/demo.gif)
+
 ---
 
 ## The Problem
