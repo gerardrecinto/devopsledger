@@ -40,24 +40,24 @@ memory layer that makes infrastructure changes legible - before, during, and aft
 DevOpsLedger CE is open source, self-hosted, and free. It is designed to be
 genuinely useful without upgrading.
 
-**CE features in progress (core integrations are free):**
-- Infra decision records (intent, risk, approval, rollback, deployment, learning)
-- GitHub PR ingestion (open source + GitHub Enterprise basic)
-- Terraform / OpenTofu plan parsing
-- Argo CD basic deployment and sync events
-- PagerDuty incident and change webhook
-- Generic incident webhook
-- Jira issue link parsing
-- CODEOWNERS approval checks
-- Risk scoring (rules-based, YAML-configurable)
-- Rollback readiness scoring
-- Basic incident correlation
-- Changed resource timeline
-- Basic dashboard
-- Docker Compose deployment
-- Helm chart
-- Local / offline mode - no required outbound SaaS calls
-- No telemetry by default
+**CE features (core integrations are free):**
+- [x] Infra decision records (intent, risk, approval, rollback, deployment, learning)
+- [x] GitHub PR ingestion (open source + GitHub Enterprise basic)
+- [x] Terraform / OpenTofu plan parsing
+- [x] Argo CD basic deployment and sync events
+- [x] PagerDuty incident and change webhook
+- [x] Generic incident webhook
+- [x] Jira issue link parsing
+- [x] CODEOWNERS approval checks
+- [x] Risk scoring (rules-based, YAML-configurable)
+- [x] Rollback readiness scoring
+- [x] Basic incident correlation
+- [x] Changed resource timeline
+- [x] Basic dashboard
+- [x] Docker Compose deployment
+- [x] Helm chart
+- [x] Local / offline mode - no required outbound SaaS calls
+- [x] No telemetry by default
 
 ---
 
@@ -126,7 +126,7 @@ make build      # rebuild images
 - Next.js frontend (`apps/web`)
 - Background worker (`apps/worker`)
 - Docker Compose (on-prem)
-- Helm chart (planned)
+- Helm chart
 
 See [docs/architecture.md](docs/architecture.md).
 
