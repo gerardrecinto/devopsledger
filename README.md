@@ -1,8 +1,10 @@
 # DevOpsLedger
 
+![DevOpsLedger logo](docs/assets/logo.svg)
+
 **Open-source operational memory for GitOps teams.**
 
-![DevOpsLedger demo](docs/demo.gif)
+![DevOpsLedger demo](docs/assets/demo.gif)
 
 ---
 
@@ -75,6 +77,8 @@ air-gapped enterprise bundles, enterprise support.
 **Payment and subscription features are not implemented yet.**
 
 See [docs/product-strategy.md](docs/product-strategy.md).
+
+For the commercial path, launch angles, and first-customer profile, see [docs/go-to-market.md](docs/go-to-market.md).
 
 ---
 
