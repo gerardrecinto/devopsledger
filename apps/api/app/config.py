@@ -7,6 +7,9 @@ class Settings(BaseSettings):
     enable_docs: bool = True
     log_level: str = "info"
     environment: str = "development"
+    risk_rules_path: str | None = None
+    offline_mode: bool = True
+    telemetry_enabled: bool = False
 
     model_config = {"env_file": ".env", "env_file_encoding": "utf-8"}
 

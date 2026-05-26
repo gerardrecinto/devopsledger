@@ -42,6 +42,9 @@ services:
       LOG_LEVEL: ${LOG_LEVEL:-info}
       ENVIRONMENT: ${ENVIRONMENT:-production}
       ENABLE_DOCS: ${ENABLE_DOCS:-false}
+      OFFLINE_MODE: ${OFFLINE_MODE:-true}
+      TELEMETRY_ENABLED: ${TELEMETRY_ENABLED:-false}
+      RISK_RULES_PATH: ${RISK_RULES_PATH:-}
     ports:
       - "8000:8000"
     depends_on:
@@ -71,6 +74,8 @@ services:
       DATABASE_URL: postgresql://${POSTGRES_USER:-devopsledger}:${POSTGRES_PASSWORD:-devopsledger}@postgres:5432/${POSTGRES_DB:-devopsledger}
       REDIS_URL: redis://redis:6379
       LOG_LEVEL: ${LOG_LEVEL:-info}
+      OFFLINE_MODE: ${OFFLINE_MODE:-true}
+      TELEMETRY_ENABLED: ${TELEMETRY_ENABLED:-false}
     depends_on:
       postgres:
         condition: service_healthy

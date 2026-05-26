@@ -1,4 +1,4 @@
-# DevOpsLedger — Claude Code Context
+# DevOpsLedger - Claude Code Context
 
 ## Product Definition
 
@@ -25,7 +25,7 @@ It answers:
 DevOpsLedger is open-core. The Community Edition is open source, self-hosted,
 and must be genuinely useful without upgrading. Premium adds hosted convenience,
 governance, compliance, enterprise identity, advanced analytics, AI assistance,
-and support — not gating on core product value.
+and support - not gating on core product value.
 
 **Community Edition includes (all free, all planned):**
 - Decision record CRUD
@@ -46,7 +46,7 @@ and support — not gating on core product value.
 - Local / offline mode
 - No telemetry by default
 
-**Premium features (not implemented — not in scope yet):**
+**Premium features (not implemented - not in scope yet):**
 - DevOpsLedger Cloud (hosted)
 - Team workspaces
 - SSO / SAML / OIDC
@@ -77,6 +77,10 @@ See `docs/product-strategy.md` for full strategy.
 ## MVP Scope (Current Phase)
 
 - Decision record CRUD (create, read, update, archive)
+- CE ingestion webhooks for GitHub PRs, Terraform/OpenTofu plans, Argo CD,
+  PagerDuty, and generic incidents
+- Rules-based risk scoring and rollback readiness scoring
+- Basic dashboard and changed resource timeline
 - API-first (FastAPI)
 - PostgreSQL storage
 - Redis for queues and caching
@@ -87,13 +91,9 @@ See `docs/product-strategy.md` for full strategy.
 - No telemetry
 
 Out of scope for current slice:
-- Helm chart
-- GitHub ingestion
-- Terraform / OpenTofu parsing
-- Argo CD events
-- PagerDuty / Jira / ServiceNow
 - AI features
 - Premium features
+- Payment or subscription checks
 
 ---
 
@@ -121,7 +121,7 @@ environment variables are set. Core product never imports integration code direc
 
 - Must run with `docker compose up` and zero outbound internet calls after image pull.
 - No hardcoded external URLs in any image or config.
-- No telemetry, analytics, or phone-home behavior — ever.
+- No telemetry, analytics, or phone-home behavior - ever.
 - All integrations optional and disabled by default, configured only via env vars.
 - Must be deployable on air-gapped networks if images are pre-pulled.
 - Helm chart (when added) must support private registries.
@@ -135,9 +135,9 @@ environment variables are set. Core product never imports integration code direc
 - All secrets via environment variables or mounted secret files.
 - No telemetry or outbound calls by default.
 - Auth not required for MVP, but the data model must not assume no-auth
-  (record who approved — even if "local user" for now).
+  (record who approved - even if "local user" for now).
 - HTTPS termination at the ingress / reverse proxy, not in the application.
-- Future: OIDC / SAML for enterprise SSO — design the API to not assume a specific auth provider.
+- Future: OIDC / SAML for enterprise SSO - design the API to not assume a specific auth provider.
 
 ---
 
@@ -147,13 +147,13 @@ environment variables are set. Core product never imports integration code direc
 - FastAPI for all API endpoints.
 - Pydantic v2 for request / response models.
 - SQLAlchemy 2.x with async sessions for database access.
-- Alembic for migrations — never `Base.metadata.create_all()` in production code.
-- No `print()` — use the `logging` module.
+- Alembic for migrations - never `Base.metadata.create_all()` in production code.
+- No `print()` - use the `logging` module.
 - Black + isort for formatting, Ruff for linting.
 - TypeScript strict mode for all frontend code.
 - ESLint + Prettier for frontend formatting.
 - No `any` types in TypeScript.
-- No inline comments explaining what the code does — only why (non-obvious constraints, workarounds).
+- No inline comments explaining what the code does - only why (non-obvious constraints, workarounds).
 - Boring, maintainable architecture over clever abstractions.
 
 ---
@@ -165,7 +165,7 @@ environment variables are set. Core product never imports integration code direc
   - A test for missing / invalid input
 - Use `pytest` + `httpx` (via FastAPI `TestClient`) for API tests.
 - Use `pytest-asyncio` for async tests.
-- No mocking the database in integration tests — use a test database.
+- No mocking the database in integration tests - use a test database.
 - Unit tests may mock external dependencies.
 - Frontend: Jest + React Testing Library.
 - No PR reduces test coverage.
@@ -177,7 +177,7 @@ environment variables are set. Core product never imports integration code direc
 - Every new entity or endpoint must update `docs/data-model.md`.
 - Architecture changes must update `docs/architecture.md`.
 - On-prem deployment changes must update `docs/on-prem.md`.
-- No inline comments explaining what code does — only why.
+- No inline comments explaining what code does - only why.
 - API docs via FastAPI's auto-generated OpenAPI (`ENABLE_DOCS=true` in dev, optional in prod).
 - Product strategy changes must update `docs/product-strategy.md`.
 
@@ -189,14 +189,14 @@ environment variables are set. Core product never imports integration code direc
 2. **No integration is required for local / offline mode.** All integrations optional,
    disabled by default, configured only via environment variables.
 3. **No telemetry or outbound calls by default.** DevOpsLedger must work in air-gapped
-   environments. No analytics SDKs, error-reporting services, or beacon URLs — ever.
+   environments. No analytics SDKs, error-reporting services, or beacon URLs - ever.
 4. **All integrations must be optional.** GitHub, Terraform/OpenTofu, Argo CD, PagerDuty,
-   Jira, ServiceNow, AI providers — optional. Product is fully functional without any of them.
+   Jira, ServiceNow, AI providers - optional. Product is fully functional without any of them.
 5. **On-prem from day one.** Every feature must work with `docker compose up`.
    Cloud-managed or SaaS features come later and are always optional.
 6. **Community Edition must include useful core DevOps integrations.** GitHub PR ingestion,
    Terraform/OpenTofu parsing, Argo CD events, PagerDuty webhooks, Jira linking, and
-   CODEOWNERS support are part of CE — not premium.
+   CODEOWNERS support are part of CE - not premium.
 7. **Premium focuses on hosted convenience, governance, compliance, scale, analytics,
    identity, AI assistance, and enterprise support.** Do not gate core DevOps functionality.
 8. **No payment or subscription features.** Not in scope yet. Do not add billing checks,
@@ -254,10 +254,10 @@ RollbackAssessment, DeploymentEvent, IncidentCorrelation, LearningNote.
 
 Requirements:
 - SQLAlchemy 2.x async models in `apps/api/app/models/`
-- Alembic migrations — never `create_all()`
+- Alembic migrations - never `create_all()`
 - Pydantic v2 schemas in `apps/api/app/schemas/`
 - Basic CRUD endpoints for `DecisionRecord`
 - Tests for all new endpoints
 - Update `docs/data-model.md`
-- Keep implementation small — no GitHub or Terraform/OpenTofu parsing yet
+- Keep implementation small - no GitHub or Terraform/OpenTofu parsing yet
 - No auth in this slice either

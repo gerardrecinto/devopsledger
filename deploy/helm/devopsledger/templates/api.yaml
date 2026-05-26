@@ -1,0 +1,37 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "devopsledger.fullname" . }}-api
+spec:
+  replicas: {{ .Values.api.replicas }}
+  selector:
+    matchLabels:
+      app: {{ include "devopsledger.fullname" . }}-api
+  template:
+    metadata:
+      labels:
+        app: {{ include "devopsledger.fullname" . }}-api
+    spec:
+      containers:
+        - name: api
+          image: "{{ .Values.image.api.repository }}:{{ .Values.image.api.tag }}"
+          imagePullPolicy: {{ .Values.image.api.pullPolicy }}
+          ports:
+            - containerPort: 8000
+          envFrom:
+            - configMapRef:
+                name: {{ include "devopsledger.fullname" . }}-config
+            - secretRef:
+                name: {{ include "devopsledger.fullname" . }}-secret
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "devopsledger.fullname" . }}-api
+spec:
+  type: {{ .Values.api.service.type }}
+  ports:
+    - port: {{ .Values.api.service.port }}
+      targetPort: 8000
+  selector:
+    app: {{ include "devopsledger.fullname" . }}-api

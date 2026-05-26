@@ -29,6 +29,7 @@ def upgrade() -> None:
         sa.Column("pr_url", sa.String(1000), nullable=True),
         sa.Column("author", sa.String(200), nullable=True),
         sa.Column("commit_sha", sa.String(40), nullable=True),
+        sa.Column("jira_issues", sa.JSON(), nullable=False, server_default="[]"),
         sa.Column("status", sa.String(50), nullable=False, server_default="open"),
         sa.Column("created_at", sa.DateTime(timezone=True), nullable=False),
         sa.Column("updated_at", sa.DateTime(timezone=True), nullable=False),

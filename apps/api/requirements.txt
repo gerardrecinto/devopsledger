@@ -8,3 +8,4 @@ asyncpg==0.30.0
 alembic==1.14.0
 aiosqlite==0.20.0
 pytest-asyncio==0.25.0
+PyYAML==6.0.3

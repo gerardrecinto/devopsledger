@@ -1,0 +1,52 @@
+image:
+  api:
+    repository: devopsledger/api
+    tag: "0.1.0"
+    pullPolicy: IfNotPresent
+  web:
+    repository: devopsledger/web
+    tag: "0.1.0"
+    pullPolicy: IfNotPresent
+  worker:
+    repository: devopsledger/worker
+    tag: "0.1.0"
+    pullPolicy: IfNotPresent
+
+api:
+  replicas: 1
+  service:
+    type: ClusterIP
+    port: 8000
+
+web:
+  replicas: 1
+  service:
+    type: ClusterIP
+    port: 3000
+
+worker:
+  replicas: 1
+
+config:
+  environment: production
+  enableDocs: "false"
+  offlineMode: "true"
+  telemetryEnabled: "false"
+  logLevel: info
+  databaseUrl: postgresql://devopsledger:changeme@postgres:5432/devopsledger
+  redisUrl: redis://redis:6379
+  apiUrl: http://devopsledger-api:8000
+  riskRulesPath: ""
+
+secrets:
+  create: true
+  databaseUrl: postgresql://devopsledger:changeme@postgres:5432/devopsledger
+
+ingress:
+  enabled: false
+  className: ""
+  hosts:
+    - host: devopsledger.local
+      paths:
+        - path: /
+          pathType: Prefix

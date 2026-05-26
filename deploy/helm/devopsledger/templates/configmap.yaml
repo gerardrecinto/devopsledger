@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "devopsledger.fullname" . }}-config
+data:
+  ENVIRONMENT: {{ .Values.config.environment | quote }}
+  ENABLE_DOCS: {{ .Values.config.enableDocs | quote }}
+  OFFLINE_MODE: {{ .Values.config.offlineMode | quote }}
+  TELEMETRY_ENABLED: {{ .Values.config.telemetryEnabled | quote }}
+  LOG_LEVEL: {{ .Values.config.logLevel | quote }}
+  REDIS_URL: {{ .Values.config.redisUrl | quote }}
+  API_URL: {{ .Values.config.apiUrl | quote }}
+  RISK_RULES_PATH: {{ .Values.config.riskRulesPath | quote }}

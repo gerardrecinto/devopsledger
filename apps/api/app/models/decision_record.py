@@ -2,7 +2,7 @@ import uuid
 from datetime import datetime, timezone
 from typing import TYPE_CHECKING, Optional
 
-from sqlalchemy import DateTime, Integer, String, Text, Uuid
+from sqlalchemy import DateTime, Integer, JSON, String, Text, Uuid
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.models.base import Base
@@ -35,6 +35,7 @@ class DecisionRecord(Base):
     pr_url: Mapped[Optional[str]] = mapped_column(String(1000))
     author: Mapped[Optional[str]] = mapped_column(String(200))
     commit_sha: Mapped[Optional[str]] = mapped_column(String(40))
+    jira_issues: Mapped[list[str]] = mapped_column(JSON, default=list, server_default="[]")
     status: Mapped[str] = mapped_column(String(50), default="open", server_default="open")
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_now)
     updated_at: Mapped[datetime] = mapped_column(

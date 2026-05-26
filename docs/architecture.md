@@ -5,9 +5,9 @@
 DevOpsLedger is a monorepo with three applications, shared deployment config, and documentation.
 
 ```
-apps/api      — FastAPI backend, primary data store interface
-apps/web      — Next.js frontend, decision record UI
-apps/worker   — Background processor, async job queue consumer
+apps/api      - FastAPI backend, primary data store interface
+apps/web      - Next.js frontend, decision record UI
+apps/worker   - Background processor, async job queue consumer
 ```
 
 ## Components
@@ -24,14 +24,15 @@ Internal layout:
 ```
 app/
   routers/        Route handlers
-  models/         SQLAlchemy 2.x async models (next slice)
-  schemas/        Pydantic v2 request / response schemas (next slice)
-  integrations/   Optional integration modules — imported only when configured
+  models/         SQLAlchemy 2.x async models
+  schemas/        Pydantic v2 request / response schemas
+  integrations/   Optional CE parsers, no outbound SaaS calls
+  scoring/        YAML-configurable risk and rollback scoring
 ```
 
 ### Web (apps/web)
 
-Next.js 15 frontend with server-side rendering. Talks only to the API — no direct database access.
+Next.js 15 frontend with server-side rendering. Talks only to the API - no direct database access.
 
 Startup: `next dev` (dev) | `node server.js` (prod standalone build)
 
@@ -64,10 +65,9 @@ PostgreSQL and Redis are internal only.
 
 ## Integration Module Design (Open-Core)
 
-Integrations live under `apps/api/app/integrations/`. Each integration is a
-self-contained module with its own dependencies declared separately. The core
-application never imports integration code directly. Instead, integrations
-register themselves at startup if their environment variables are present.
+Integrations live under `apps/api/app/integrations/`. CE integrations are pure
+payload parsers and ingestion endpoints. They accept local webhook payloads and
+do not call GitHub, Argo CD, PagerDuty, Jira, Terraform Cloud, or any other SaaS.
 
 ```
 app/integrations/
@@ -75,27 +75,28 @@ app/integrations/
   terraform/      Plan parsing (CE)
   argocd/         Deployment and sync events (CE)
   pagerduty/      Incident and change webhooks (CE)
-  incident/       Generic incident webhook (CE)
-  jira/           Issue link parsing (CE)
+  generic_incident/ Generic incident webhook (CE)
+  github/         Jira issue link parsing from PR text (CE)
   # premium integrations are not in this directory
 ```
 
 Premium integration modules are not part of the open-source repository.
 They are loaded as optional packages at runtime if installed.
 
-This design ensures:
-- `pip install devopsledger` installs only the open-source core.
-- Optional integration dependencies are not pulled in unless needed.
-- Premium modules can be distributed separately without polluting CE code.
-- Air-gapped installs work without internet access to integration endpoints.
+This design ensures local/offline mode works after images are available and
+that CE features do not require credentials or outbound network access.
 
 ## Configuration
 
 All configuration via environment variables. See `.env.example` for full reference.
 No configuration is baked into images. Secrets must never be committed.
 
-Each integration reads its own env vars at startup. If the vars are absent,
-the integration is skipped silently. No errors. No required network calls.
+Important defaults:
+- `OFFLINE_MODE=true`
+- `TELEMETRY_ENABLED=false`
+- `RISK_RULES_PATH` optional path to a mounted YAML file for rules-based risk scoring
+
+No analytics, telemetry, or phone-home behavior is configured by default.
 
 ## On-Prem Deployment
 

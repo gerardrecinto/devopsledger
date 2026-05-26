@@ -6,7 +6,7 @@ DevOpsLedger is designed for on-prem-first deployment. It runs entirely without 
 
 ```bash
 cp .env.example .env
-# Edit .env — change POSTGRES_PASSWORD at minimum
+# Edit .env - change POSTGRES_PASSWORD at minimum
 make up
 # API:  http://localhost:8000/health
 # Web:  http://localhost:3000
@@ -25,9 +25,14 @@ make up
 All configuration via environment variables. See `.env.example`.
 
 Mandatory changes before production:
-- `POSTGRES_PASSWORD` — never use the default
+- `POSTGRES_PASSWORD` - never use the default
 - `ENVIRONMENT=production`
-- `ENABLE_DOCS=false` — disables Swagger UI in prod
+- `ENABLE_DOCS=false` - disables Swagger UI in prod
+
+Offline and telemetry defaults:
+- `OFFLINE_MODE=true`
+- `TELEMETRY_ENABLED=false`
+- `RISK_RULES_PATH` can point at a mounted YAML file to override risk scoring rules
 
 ## Air-Gapped Deployment
 
@@ -73,11 +78,25 @@ make down
 make up
 ```
 
-Migrations run automatically on API startup once Alembic is wired in.
+Migrations run automatically on API startup.
+
+## Helm Chart
+
+A basic Kubernetes chart is available at `deploy/helm/devopsledger`.
+
+```bash
+helm install devopsledger deploy/helm/devopsledger \
+  --set secrets.databaseUrl='postgresql://devopsledger:changeme@postgres:5432/devopsledger' \
+  --set config.redisUrl='redis://redis:6379'
+```
+
+The chart assumes PostgreSQL and Redis are provided separately. Images, private
+registries, ingress, offline mode, telemetry, and risk rules are configured in
+`values.yaml`.
 
 ## Reverse Proxy (Recommended for Production)
 
-Terminate TLS at nginx, Caddy, or Traefik — not in the app.
+Terminate TLS at nginx, Caddy, or Traefik - not in the app.
 
 Example nginx snippet:
 

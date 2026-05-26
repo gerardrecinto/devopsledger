@@ -1,7 +1,7 @@
 import uuid
 from datetime import datetime
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 
 class DecisionRecordCreate(BaseModel):
@@ -14,6 +14,7 @@ class DecisionRecordCreate(BaseModel):
     pr_url: str | None = None
     author: str | None = None
     commit_sha: str | None = None
+    jira_issues: list[str] = Field(default_factory=list)
     status: str = "open"
 
 
@@ -27,6 +28,7 @@ class DecisionRecordUpdate(BaseModel):
     pr_url: str | None = None
     author: str | None = None
     commit_sha: str | None = None
+    jira_issues: list[str] | None = None
     status: str | None = None
 
 
@@ -37,6 +39,7 @@ class DecisionRecordSummary(BaseModel):
     service_name: str | None
     repository: str | None
     author: str | None
+    jira_issues: list[str]
     status: str
     created_at: datetime
     updated_at: datetime
@@ -55,6 +58,7 @@ class DecisionRecordDetail(BaseModel):
     pr_url: str | None
     author: str | None
     commit_sha: str | None
+    jira_issues: list[str]
     status: str
     created_at: datetime
     updated_at: datetime

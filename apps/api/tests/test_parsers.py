@@ -1,5 +1,10 @@
 from app.integrations.argocd.parser import parse_sync_event
-from app.integrations.github.parser import parse_codeowners_review, parse_pr_event
+from app.integrations.github.parser import (
+    check_codeowners_approval,
+    parse_codeowners_review,
+    parse_jira_issue_keys,
+    parse_pr_event,
+)
 from app.integrations.pagerduty.parser import parse_incident_webhook
 from app.integrations.terraform.parser import parse_plan
 
@@ -40,6 +45,35 @@ def test_github_codeowners_approved():
 def test_github_codeowners_rejected():
     review = {"user": {"login": "bob"}, "state": "changes_requested", "body": "Needs work"}
     result = parse_codeowners_review(review)
+    assert result["approved"] is False
+
+
+def test_jira_issue_key_parsing():
+    assert parse_jira_issue_keys("Refs PLAT-42 and SRE-7") == ["PLAT-42", "SRE-7"]
+
+
+def test_codeowners_approval_check_matches_owner_review():
+    codeowners = """
+    * @platform/team
+    terraform/prod/* @alice @bob
+    """
+    result = check_codeowners_approval(
+        changed_files=["terraform/prod/api.tf"],
+        codeowners_text=codeowners,
+        reviews=[{"user": {"login": "alice"}, "state": "APPROVED"}],
+    )
+    assert result["required"] is True
+    assert result["approved"] is True
+    assert result["owner"] == "alice"
+
+
+def test_codeowners_approval_check_missing_owner_review():
+    result = check_codeowners_approval(
+        changed_files=["terraform/prod/api.tf"],
+        codeowners_text="terraform/prod/* @alice",
+        reviews=[{"user": {"login": "mallory"}, "state": "APPROVED"}],
+    )
+    assert result["required"] is True
     assert result["approved"] is False
 
 
