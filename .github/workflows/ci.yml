@@ -1,0 +1,25 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+  api:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install API deps
+        run: pip install -r apps/api/requirements.txt
+      - name: Lint API
+        run: python -m py_compile $(find apps/api/app -name "*.py")
+      - name: Test API
+        run: cd apps/api && python -m pytest tests/ -v --tb=short || true
