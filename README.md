@@ -1,5 +1,10 @@
 # DevOpsLedger
 
+![CI](https://github.com/gerardrecinto/devopsledger/actions/workflows/ci.yml/badge.svg)
+![Release](https://github.com/gerardrecinto/devopsledger/actions/workflows/release.yml/badge.svg)
+![Python](https://img.shields.io/badge/Python-3.11%2B-blue?logo=python&logoColor=white)
+![License](https://img.shields.io/badge/License-MIT-lightgrey)
+
 ![DevOpsLedger logo](docs/assets/logo.svg)
 
 **Open-source operational memory for GitOps teams.**
@@ -99,6 +104,14 @@ rollback scoring, incident correlation, dashboard API, Docker Compose, and a
 basic Helm chart are available.
 
 ---
+
+## Docker
+
+```bash
+docker pull ghcr.io/gerardrecinto/devopsledger:latest
+```
+
+The API Dockerfile includes a `HEALTHCHECK` so Docker and orchestrators can detect startup failures without an external probe. `GET /health` returns 200 when the API is ready.
 
 ## Quick Start
 
