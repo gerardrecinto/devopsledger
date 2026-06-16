@@ -1,9 +1,10 @@
-.PHONY: help up down logs build test test-api dev api-dev migrate revision docker-up docker-down
+.PHONY: help up down logs build test test-api dev api-dev migrate revision package docker-up docker-down
 
 COMPOSE   = docker compose -f deploy/docker-compose/docker-compose.yml
 API_DIR   = apps/api
 PYTHON    = $(API_DIR)/.venv/bin/python
 ALEMBIC   = $(API_DIR)/.venv/bin/alembic
+VERSION  ?= dev
 
 help:
 	@echo "DevOpsLedger"
@@ -17,6 +18,7 @@ help:
 	@echo "  dev / api-dev      Start API locally with hot-reload"
 	@echo "  migrate            Run pending Alembic migrations"
 	@echo "  revision           Create new migration: make revision message=\"add foo\""
+	@echo "  package            Build release bundle: make package VERSION=v1.1.0"
 
 up docker-up:
 	$(COMPOSE) up -d
@@ -43,3 +45,6 @@ migrate:
 
 revision:
 	cd $(API_DIR) && python -m alembic revision --autogenerate -m "$(message)"
+
+package:
+	./scripts/package-release.sh "$(VERSION)"

@@ -105,10 +105,31 @@ basic Helm chart are available.
 
 ---
 
+## Demo Package
+
+Each release includes a self-hosted demo package for the API, web portal, worker,
+Docker Compose, Helm chart, docs, and demo GIF.
+
+```bash
+make package VERSION=v1.1.0
+tar -xzf dist/devopsledger-v1.1.0-demo-package.tar.gz
+cd devopsledger-v1.1.0-demo-package
+cp env.example .env
+DEVOPSLEDGER_VERSION=1.1.0 docker compose -f deploy/docker-compose/docker-compose.release.yml up -d
+```
+
+- API: `http://localhost:8000/health`
+- API docs when `ENABLE_DOCS=true`: `http://localhost:8000/docs`
+- Web portal: `http://localhost:3000`
+
+See [docs/demo-package.md](docs/demo-package.md).
+
 ## Docker
 
 ```bash
-docker pull ghcr.io/gerardrecinto/devopsledger:latest
+docker pull ghcr.io/gerardrecinto/devopsledger/api:latest
+docker pull ghcr.io/gerardrecinto/devopsledger/web:latest
+docker pull ghcr.io/gerardrecinto/devopsledger/worker:latest
 ```
 
 The API Dockerfile includes a `HEALTHCHECK` so Docker and orchestrators can detect startup failures without an external probe. `GET /health` returns 200 when the API is ready.

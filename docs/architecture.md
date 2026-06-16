@@ -102,6 +102,20 @@ No analytics, telemetry, or phone-home behavior is configured by default.
 
 See `docs/on-prem.md`.
 
+## Release Packaging
+
+Release tags publish three GHCR images:
+
+```
+ghcr.io/gerardrecinto/devopsledger/api:<version>
+ghcr.io/gerardrecinto/devopsledger/web:<version>
+ghcr.io/gerardrecinto/devopsledger/worker:<version>
+```
+
+The release workflow also attaches a demo package containing the release Compose
+file, Helm chart, env reference, docs, and demo GIF. The release Compose file
+uses immutable release image tags instead of local Docker build contexts.
+
 ## Security
 
 See `docs/security-model.md`.
