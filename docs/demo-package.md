@@ -3,6 +3,10 @@
 DevOpsLedger releases ship a self-hosted demo package for people who want to
 evaluate the API, web portal, and worker without cloning the full repository.
 
+Use it as the short, buyer-facing walkthrough: a platform lead can see the
+product story, run the stack, inspect the API, and verify the on-prem posture in
+one pass.
+
 The package includes:
 
 - API, web portal, and worker image references
@@ -41,3 +45,17 @@ Open:
 
 The demo package keeps the CE defaults: offline mode on, telemetry off, and no
 required SaaS credentials.
+
+## What To Show
+
+For a polished demo, walk through this order:
+
+1. Open the web portal at `http://localhost:3000`.
+2. Show the dashboard metrics and changed-resource timeline.
+3. Open `http://localhost:8000/health` to prove the API is live.
+4. Enable `ENABLE_DOCS=true` and open `http://localhost:8000/docs` for the API surface.
+5. Show `docs/architecture.md`, `docs/security-model.md`, and `docs/on-prem.md` to make the self-hosted story concrete.
+
+The selling point is simple: DevOpsLedger turns an infrastructure change from a
+scattered trail of PRs, diffs, approvals, incidents, and memories into one record
+a team can trust later.

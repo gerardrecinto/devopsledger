@@ -67,5 +67,6 @@ jobs:
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
+          body_path: dist/devopsledger-${{ github.ref_name }}-demo-package/RELEASE_NOTES.md
           generate_release_notes: true
           files: dist/devopsledger-${{ github.ref_name }}-demo-package.tar.gz

@@ -11,6 +11,15 @@
 
 ![DevOpsLedger demo](docs/assets/demo.gif)
 
+DevOpsLedger gives platform teams a clean answer when someone asks, "Why did
+this infrastructure change happen?" It connects the intent, diff, risk,
+approval, rollback readiness, deployment evidence, incident aftermath, and
+learning into one durable record.
+
+The demo package is built for serious evaluation: run the API, open the web
+portal, inspect the docs, and see the self-hosted path without signing up for a
+SaaS account or enabling telemetry.
+
 ---
 
 ## The Problem
@@ -123,6 +132,14 @@ DEVOPSLEDGER_VERSION=1.1.0 docker compose -f deploy/docker-compose/docker-compos
 - Web portal: `http://localhost:3000`
 
 See [docs/demo-package.md](docs/demo-package.md).
+
+**Good evaluator flow:**
+
+1. Start the release package.
+2. Open the web portal and changed-resource timeline.
+3. Hit the API health and docs endpoints.
+4. Read the architecture, data model, security, and on-prem docs.
+5. Confirm the default posture: offline mode on, telemetry off, integrations optional.
 
 ## Docker
 
