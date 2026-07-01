@@ -1,6 +1,6 @@
 import uuid
-from datetime import datetime, timezone
-from typing import TYPE_CHECKING, Optional
+from datetime import UTC, datetime
+from typing import TYPE_CHECKING
 
 from sqlalchemy import Boolean, DateTime, ForeignKey, String, Text, Uuid
 from sqlalchemy.orm import Mapped, mapped_column, relationship
@@ -12,7 +12,7 @@ if TYPE_CHECKING:
 
 
 def _now() -> datetime:
-    return datetime.now(timezone.utc)
+    return datetime.now(UTC)
 
 
 class ApprovalEvidence(Base):
@@ -23,11 +23,11 @@ class ApprovalEvidence(Base):
         Uuid, ForeignKey("decision_records.id", ondelete="CASCADE")
     )
     source: Mapped[str] = mapped_column(String(100))
-    owner: Mapped[Optional[str]] = mapped_column(String(200))
-    approver: Mapped[Optional[str]] = mapped_column(String(200))
+    owner: Mapped[str | None] = mapped_column(String(200))
+    approver: Mapped[str | None] = mapped_column(String(200))
     required: Mapped[bool] = mapped_column(Boolean, default=False, server_default="false")
     approved: Mapped[bool] = mapped_column(Boolean, default=False, server_default="false")
-    reason: Mapped[Optional[str]] = mapped_column(Text)
+    reason: Mapped[str | None] = mapped_column(Text)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_now)
 
     decision_record: Mapped["DecisionRecord"] = relationship(back_populates="approval_evidence")

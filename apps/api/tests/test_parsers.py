@@ -8,7 +8,6 @@ from app.integrations.github.parser import (
 from app.integrations.pagerduty.parser import parse_incident_webhook
 from app.integrations.terraform.parser import parse_plan
 
-
 # ── GitHub ────────────────────────────────────────────────────────────────────
 
 def test_github_pr_title():

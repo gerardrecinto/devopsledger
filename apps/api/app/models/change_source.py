@@ -1,8 +1,8 @@
 import uuid
-from datetime import datetime, timezone
-from typing import TYPE_CHECKING, Any, Optional
+from datetime import UTC, datetime
+from typing import TYPE_CHECKING, Any
 
-from sqlalchemy import DateTime, ForeignKey, JSON, String, Uuid
+from sqlalchemy import JSON, DateTime, ForeignKey, String, Uuid
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.models.base import Base
@@ -12,7 +12,7 @@ if TYPE_CHECKING:
 
 
 def _now() -> datetime:
-    return datetime.now(timezone.utc)
+    return datetime.now(UTC)
 
 
 class ChangeSource(Base):
@@ -23,9 +23,9 @@ class ChangeSource(Base):
         Uuid, ForeignKey("decision_records.id", ondelete="CASCADE")
     )
     source_type: Mapped[str] = mapped_column(String(100))
-    external_id: Mapped[Optional[str]] = mapped_column(String(500))
-    url: Mapped[Optional[str]] = mapped_column(String(1000))
-    raw_payload: Mapped[Optional[Any]] = mapped_column(JSON)
+    external_id: Mapped[str | None] = mapped_column(String(500))
+    url: Mapped[str | None] = mapped_column(String(1000))
+    raw_payload: Mapped[Any | None] = mapped_column(JSON)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_now)
 
     decision_record: Mapped["DecisionRecord"] = relationship(back_populates="change_sources")

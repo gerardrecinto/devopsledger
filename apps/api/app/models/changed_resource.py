@@ -1,8 +1,8 @@
 import uuid
-from datetime import datetime, timezone
-from typing import TYPE_CHECKING, Any, Optional
+from datetime import UTC, datetime
+from typing import TYPE_CHECKING, Any
 
-from sqlalchemy import DateTime, ForeignKey, JSON, String, Uuid
+from sqlalchemy import JSON, DateTime, ForeignKey, String, Uuid
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.models.base import Base
@@ -12,7 +12,7 @@ if TYPE_CHECKING:
 
 
 def _now() -> datetime:
-    return datetime.now(timezone.utc)
+    return datetime.now(UTC)
 
 
 class ChangedResource(Base):
@@ -22,12 +22,12 @@ class ChangedResource(Base):
     decision_record_id: Mapped[uuid.UUID] = mapped_column(
         Uuid, ForeignKey("decision_records.id", ondelete="CASCADE")
     )
-    address: Mapped[Optional[str]] = mapped_column(String(500))
+    address: Mapped[str | None] = mapped_column(String(500))
     resource_type: Mapped[str] = mapped_column(String(200))
-    provider: Mapped[Optional[str]] = mapped_column(String(100))
+    provider: Mapped[str | None] = mapped_column(String(100))
     actions: Mapped[Any] = mapped_column(JSON, default=list)
-    before_summary: Mapped[Optional[Any]] = mapped_column(JSON)
-    after_summary: Mapped[Optional[Any]] = mapped_column(JSON)
+    before_summary: Mapped[Any | None] = mapped_column(JSON)
+    after_summary: Mapped[Any | None] = mapped_column(JSON)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_now)
 
     decision_record: Mapped["DecisionRecord"] = relationship(back_populates="changed_resources")

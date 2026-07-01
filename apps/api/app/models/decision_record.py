@@ -1,8 +1,8 @@
 import uuid
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from typing import TYPE_CHECKING, Optional
 
-from sqlalchemy import DateTime, Integer, JSON, String, Text, Uuid
+from sqlalchemy import JSON, DateTime, Integer, String, Text, Uuid
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.models.base import Base
@@ -19,7 +19,7 @@ if TYPE_CHECKING:
 
 
 def _now() -> datetime:
-    return datetime.now(timezone.utc)
+    return datetime.now(UTC)
 
 
 class DecisionRecord(Base):
@@ -27,14 +27,14 @@ class DecisionRecord(Base):
 
     id: Mapped[uuid.UUID] = mapped_column(Uuid, primary_key=True, default=uuid.uuid4)
     title: Mapped[str] = mapped_column(String(500))
-    description: Mapped[Optional[str]] = mapped_column(Text)
-    environment: Mapped[Optional[str]] = mapped_column(String(100))
-    service_name: Mapped[Optional[str]] = mapped_column(String(200))
-    repository: Mapped[Optional[str]] = mapped_column(String(500))
-    pr_number: Mapped[Optional[int]] = mapped_column(Integer)
-    pr_url: Mapped[Optional[str]] = mapped_column(String(1000))
-    author: Mapped[Optional[str]] = mapped_column(String(200))
-    commit_sha: Mapped[Optional[str]] = mapped_column(String(40))
+    description: Mapped[str | None] = mapped_column(Text)
+    environment: Mapped[str | None] = mapped_column(String(100))
+    service_name: Mapped[str | None] = mapped_column(String(200))
+    repository: Mapped[str | None] = mapped_column(String(500))
+    pr_number: Mapped[int | None] = mapped_column(Integer)
+    pr_url: Mapped[str | None] = mapped_column(String(1000))
+    author: Mapped[str | None] = mapped_column(String(200))
+    commit_sha: Mapped[str | None] = mapped_column(String(40))
     jira_issues: Mapped[list[str]] = mapped_column(JSON, default=list, server_default="[]")
     status: Mapped[str] = mapped_column(String(50), default="open", server_default="open")
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_now)
