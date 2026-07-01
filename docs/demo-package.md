@@ -19,22 +19,22 @@ The package includes:
 ## Build Locally
 
 ```bash
-make package VERSION=v1.1.0
+make package VERSION=v1.2.0
 ```
 
 The archive is written to:
 
 ```text
-dist/devopsledger-v1.1.0-demo-package.tar.gz
+dist/devopsledger-v1.2.0-demo-package.tar.gz
 ```
 
 ## Run From The Package
 
 ```bash
-tar -xzf devopsledger-v1.1.0-demo-package.tar.gz
-cd devopsledger-v1.1.0-demo-package
+tar -xzf devopsledger-v1.2.0-demo-package.tar.gz
+cd devopsledger-v1.2.0-demo-package
 cp env.example .env
-DEVOPSLEDGER_VERSION=1.1.0 docker compose -f deploy/docker-compose/docker-compose.release.yml up -d
+DEVOPSLEDGER_VERSION=1.2.0 docker compose -f deploy/docker-compose/docker-compose.release.yml up -d
 ```
 
 Open:
