@@ -9,6 +9,10 @@ COPY app/ ./app/
 COPY alembic.ini .
 COPY alembic/ ./alembic/
 
+RUN useradd --system --create-home --shell /usr/sbin/nologin appuser \
+  && chown -R appuser:appuser /app
+USER appuser
+
 EXPOSE 8000
 HEALTHCHECK --interval=30s --timeout=5s --retries=3 \
   CMD python -c "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')" || exit 1
