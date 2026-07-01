@@ -7,7 +7,6 @@ on:
 
 permissions:
   contents: read
-  packages: write
 
 jobs:
   api:
@@ -19,7 +18,41 @@ jobs:
           python-version: "3.12"
       - name: Install API deps
         run: pip install -r apps/api/requirements.txt
+      - name: Install lint/security tools
+        run: pip install ruff pip-audit bandit
       - name: Lint API
-        run: python -m py_compile $(find apps/api/app -name "*.py")
+        run: cd apps/api && ruff check .
+      - name: Dependency vulnerability scan
+        run: pip-audit -r apps/api/requirements.txt
+      - name: SAST scan
+        run: bandit -r apps/api/app -ll
       - name: Test API
-        run: cd apps/api && python -m pytest tests/ -v --tb=short || true
+        run: cd apps/api && python -m pytest tests/ -v --tb=short
+
+  worker:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install worker deps
+        run: pip install -r apps/worker/requirements.txt ruff pip-audit
+      - name: Lint worker
+        run: cd apps/worker && ruff check --select E,F,I,UP --target-version py312 .
+      - name: Dependency vulnerability scan
+        run: pip-audit -r apps/worker/requirements.txt
+
+  web:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: "npm"
+          cache-dependency-path: apps/web/package-lock.json
+      - name: Install web deps
+        run: cd apps/web && npm ci
+      - name: Build web
+        run: cd apps/web && npm run build
