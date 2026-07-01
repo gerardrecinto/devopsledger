@@ -2,7 +2,7 @@
 
 ![CI](https://github.com/gerardrecinto/devopsledger/actions/workflows/ci.yml/badge.svg)
 ![Release](https://github.com/gerardrecinto/devopsledger/actions/workflows/release.yml/badge.svg)
-![Python](https://img.shields.io/badge/Python-3.11%2B-blue?logo=python&logoColor=white)
+![Python](https://img.shields.io/badge/Python-3.12%2B-blue?logo=python&logoColor=white)
 ![License](https://img.shields.io/badge/License-MIT-lightgrey)
 
 ![DevOpsLedger logo](docs/assets/logo.svg)
@@ -120,11 +120,11 @@ Each release includes a self-hosted demo package for the API, web portal, worker
 Docker Compose, Helm chart, docs, and demo GIF.
 
 ```bash
-make package VERSION=v1.1.0
-tar -xzf dist/devopsledger-v1.1.0-demo-package.tar.gz
-cd devopsledger-v1.1.0-demo-package
+make package VERSION=v1.2.0
+tar -xzf dist/devopsledger-v1.2.0-demo-package.tar.gz
+cd devopsledger-v1.2.0-demo-package
 cp env.example .env
-DEVOPSLEDGER_VERSION=1.1.0 docker compose -f deploy/docker-compose/docker-compose.release.yml up -d
+DEVOPSLEDGER_VERSION=1.2.0 docker compose -f deploy/docker-compose/docker-compose.release.yml up -d
 ```
 
 - API: `http://localhost:8000/health`

@@ -5,7 +5,7 @@ from app.routers import ce_features, decision_records, health
 
 app = FastAPI(
     title="DevOpsLedger API",
-    version="0.1.0",
+    version="1.2.0",
     docs_url="/docs" if settings.enable_docs else None,
     redoc_url="/redoc" if settings.enable_docs else None,
 )

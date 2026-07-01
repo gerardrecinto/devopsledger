@@ -20,7 +20,10 @@ Never commit `.env`. The `.env.example` file contains only safe placeholder valu
 ## Network Security
 
 - API and Web are the only services exposed externally.
-- PostgreSQL and Redis bind to the internal Docker network only.
+- The release Compose file (`docker-compose.release.yml`) does not publish PostgreSQL or Redis
+  ports to the host at all — they're reachable only on the internal Docker network.
+- The local dev Compose file (`docker-compose.yml`) binds PostgreSQL and Redis to
+  `127.0.0.1` for local debugging, not `0.0.0.0`.
 - TLS termination at the reverse proxy (nginx / Caddy / Traefik) — not in the application.
 - No ports bound to `0.0.0.0` in production without a firewall or ingress rule.
 
@@ -33,15 +36,17 @@ a specific identity provider. The API will never hard-code an auth backend.
 
 ## Audit Trail
 
-Decision records are designed as immutable, append-only records. Every state change creates a
-new version — not an in-place update. This constraint is enforced at the data model layer.
+Decision records are mutable in the current data model: `PATCH` updates the row in place and
+`updated_at` reflects the last write. Append-only versioning is not implemented yet — treat the
+API as a live record store, not a tamper-evident log, until that lands.
 
 ## Dependency Security
 
 - Base images are pinned to specific major versions (no `latest` tag).
 - Python dependencies are pinned in `requirements.txt`.
 - Node dependencies are locked via `package-lock.json`.
-- Planned: automated dependency scanning in CI (optional, not required for on-prem deploys).
+- CI runs `pip-audit` against both `requirements.txt` files and `bandit` against the API source
+  on every push and pull request. A finding fails the build.
 
 ## Reporting Vulnerabilities
 
