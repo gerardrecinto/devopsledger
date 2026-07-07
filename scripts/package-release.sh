@@ -25,51 +25,39 @@ cp .env.example "$dist_dir/env.example"
 cp -R docs "$dist_dir/docs"
 cp -R deploy "$dist_dir/deploy"
 
+# Pull this version's section out of the changelog so release notes track the
+# actual release instead of repeating a fixed blurb.
+changelog_section="$(awk -v ver="$package_version" '
+  index($0, "## " ver) == 1 { flag = 1; next }
+  /^## / { flag = 0 }
+  flag { print }
+' CHANGELOG.md)"
+
+if [ -z "$changelog_section" ]; then
+  changelog_section="See CHANGELOG.md for details."
+fi
+
 cat > "$dist_dir/RELEASE_NOTES.md" <<EOF
-# DevOpsLedger ${package_version}: API + Web Portal Demo Package
+# DevOpsLedger ${package_version}
 
-This release turns DevOpsLedger into a cleaner evaluation package: one download,
-release-tagged images, a runnable web portal, API surface, worker, deployment
-manifests, and the docs a platform team needs to judge the product seriously.
+## What's in this release
+${changelog_section}
 
-DevOpsLedger is for the moment after an infrastructure change ships and someone
-asks: why did this happen, what changed, who approved it, how risky was it, and
-could we roll it back?
+## Demo package
 
-It includes:
 - API service release image: ghcr.io/gerardrecinto/devopsledger/api:${package_version#v}
 - Web portal release image: ghcr.io/gerardrecinto/devopsledger/web:${package_version#v}
 - Worker release image: ghcr.io/gerardrecinto/devopsledger/worker:${package_version#v}
-- Docker Compose release file
-- Helm chart
-- Environment variable reference
-- Product, architecture, security, on-prem, and data-model docs
-- Demo GIF for the API and web portal flow
-
-Why this matters:
-- The API proves the operational-memory model is inspectable and automatable.
-- The web portal gives evaluators a fast visual read on records, resources, deployments, and incidents.
-- The release Compose file runs pinned images instead of local build contexts.
-- The default posture remains self-hosted, offline-friendly, and telemetry-free.
-
-Quick run:
+- Docker Compose release file, Helm chart, env reference, docs, demo GIF
 
 \`\`\`bash
 cp env.example .env
 docker compose -f deploy/docker-compose/docker-compose.release.yml up -d
 \`\`\`
 
-Endpoints:
 - API health: http://localhost:8000/health
 - API docs when ENABLE_DOCS=true: http://localhost:8000/docs
 - Web portal: http://localhost:3000
-
-Best demo path:
-1. Open the web portal.
-2. Show the changed-resource timeline.
-3. Hit API health and API docs.
-4. Walk the architecture, security, and on-prem docs.
-5. Point out that integrations are optional and disabled by default.
 EOF
 
 tar -czf "$archive" -C dist "$name"

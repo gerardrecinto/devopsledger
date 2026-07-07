@@ -1,5 +1,14 @@
 # Changelog
 
+## v1.2.1 - Bugfix release
+
+- Fixed PATCH on decision records: `null` for a nullable field (say, clearing a stale description) was silently dropped instead of clearing it. Explicitly nulling a required field like `title` now returns a 422 instead of attempting a broken write.
+- The Argo CD ingest endpoint no longer 500s when a payload has `spec`, `status`, or `operationState` set to `null` — Argo notification templates do emit these as null in some states.
+- Incident webhooks with a malformed `started_at` timestamp no longer crash the correlation pass; the timestamp is dropped and the incident still correlates.
+- The release compose file defaulted to the 1.1.0 images even in the 1.2.0 package. It now defaults to the version it ships with.
+- Release notes in the demo package are now generated from this changelog instead of repeating the same v1.1.0 marketing blurb on every release.
+- The release workflow can be run manually with a version input; it cuts the tag itself instead of requiring a tag push.
+
 ## v1.2.0 - Hardening pass
 
 - CI now actually lints (ruff) and gates on test failures instead of swallowing them with `|| true`. Added pip-audit and bandit as blocking checks, plus a web build job and a worker lint job — none of those ran before.
