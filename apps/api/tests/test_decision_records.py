@@ -75,6 +75,31 @@ def test_update_fields(client):
     assert data["status"] == "deployed"
 
 
+def test_update_can_clear_nullable_field(client):
+    record_id = client.post(
+        "/api/v1/decision-records",
+        json={"title": "Keep title", "description": "stale context"},
+    ).json()["id"]
+    resp = client.patch(
+        f"/api/v1/decision-records/{record_id}",
+        json={"description": None},
+    )
+    assert resp.status_code == 200
+    assert resp.json()["description"] is None
+    assert resp.json()["title"] == "Keep title"
+
+
+def test_update_rejects_null_title(client):
+    record_id = client.post(
+        "/api/v1/decision-records", json={"title": "Required"}
+    ).json()["id"]
+    resp = client.patch(
+        f"/api/v1/decision-records/{record_id}",
+        json={"title": None},
+    )
+    assert resp.status_code == 422
+
+
 def test_update_not_found(client):
     resp = client.patch(
         f"/api/v1/decision-records/{uuid.uuid4()}",

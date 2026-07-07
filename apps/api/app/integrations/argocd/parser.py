@@ -15,11 +15,11 @@ def parse_sync_event(payload: dict[str, Any]) -> dict[str, Any]:
     Handles both the official webhook format and Argo CD notifications format.
     Returns DeploymentEvent-compatible field dict.
     """
-    app = payload.get("app", payload)
-    spec = app.get("spec", {})
-    status = app.get("status", {})
-    op_state = status.get("operationState", {})
-    sync = status.get("sync", {})
+    app = payload.get("app") or payload
+    spec = app.get("spec") or {}
+    status = app.get("status") or {}
+    op_state = status.get("operationState") or {}
+    sync = status.get("sync") or {}
 
     return {
         "source": "argocd",

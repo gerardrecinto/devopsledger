@@ -89,6 +89,50 @@ def test_argocd_ingestion_records_deployment_event(client):
     assert resp.json()["deployment_events"][0]["app_name"] == "payment-api"
 
 
+def test_argocd_ingestion_tolerates_null_sections(client):
+    record_id = client.post(
+        "/api/v1/decision-records",
+        json={"title": "Deploy search", "commit_sha": "cafe1234"},
+    ).json()["id"]
+
+    resp = client.post(
+        "/api/v1/ingest/argocd",
+        json={
+            "decision_record_id": record_id,
+            "app": {
+                "metadata": {"name": "search-api"},
+                "spec": None,
+                "status": {"operationState": None, "sync": {"revision": "cafe1234"}},
+            },
+        },
+    )
+
+    assert resp.status_code == 201
+    assert resp.json()["deployment_events"][0]["app_name"] == "search-api"
+
+
+def test_generic_incident_webhook_tolerates_malformed_timestamp(client):
+    client.post(
+        "/api/v1/decision-records",
+        json={
+            "title": "Rotate certs",
+            "service_name": "edge-proxy",
+            "environment": "production",
+        },
+    )
+    resp = client.post(
+        "/api/v1/ingest/incidents/generic",
+        json={
+            "title": "Edge proxy down",
+            "service_name": "edge-proxy",
+            "environment": "production",
+            "started_at": "yesterday-ish",
+        },
+    )
+    assert resp.status_code == 201
+    assert resp.json()["correlated_count"] == 1
+
+
 def test_generic_incident_webhook_correlates_by_service_and_environment(client):
     record_id = client.post(
         "/api/v1/decision-records",

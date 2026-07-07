@@ -38,7 +38,7 @@ async def update_decision_record(
     record: DecisionRecord,
     data: DecisionRecordUpdate,
 ) -> DecisionRecord:
-    for field, value in data.model_dump(exclude_none=True).items():
+    for field, value in data.model_dump(exclude_unset=True).items():
         setattr(record, field, value)
     await db.commit()
     await db.refresh(record)

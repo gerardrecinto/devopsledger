@@ -1,7 +1,7 @@
 import uuid
 from datetime import datetime
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
 
 
 class DecisionRecordCreate(BaseModel):
@@ -30,6 +30,13 @@ class DecisionRecordUpdate(BaseModel):
     commit_sha: str | None = None
     jira_issues: list[str] | None = None
     status: str | None = None
+
+    @field_validator("title", "status", "jira_issues")
+    @classmethod
+    def _reject_explicit_null(cls, value: object) -> object:
+        if value is None:
+            raise ValueError("field cannot be set to null")
+        return value
 
 
 class DecisionRecordSummary(BaseModel):
