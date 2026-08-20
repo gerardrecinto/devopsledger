@@ -16,6 +16,7 @@ from app.integrations.pagerduty.parser import parse_incident_webhook
 from app.integrations.terraform.parser import parse_plan
 from app.models.approval_evidence import ApprovalEvidence
 from app.models.decision_record import DecisionRecord
+from app.schemas.learning_note import LearningNoteCreate
 
 router = APIRouter(prefix="/api/v1")
 
@@ -44,6 +45,22 @@ async def ingest_terraform_plan(
     if record is None:
         raise HTTPException(status_code=404, detail="Decision record not found")
     updated = await crud.add_changed_resources(db, record, parse_plan(payload), payload)
+    return crud.serialize_record(updated)
+
+
+@router.post(
+    "/decision-records/{record_id}/learning-notes",
+    status_code=status.HTTP_201_CREATED,
+)
+async def add_learning_note(
+    record_id: uuid.UUID,
+    data: LearningNoteCreate,
+    db: AsyncSession = Depends(get_db),
+) -> dict[str, Any]:
+    record = await crud.get_record_detail(db, record_id)
+    if record is None:
+        raise HTTPException(status_code=404, detail="Decision record not found")
+    updated = await crud.add_learning_note(db, record, data.note, data.author)
     return crud.serialize_record(updated)
 
 

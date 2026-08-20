@@ -15,6 +15,7 @@ from app.models.changed_resource import ChangedResource
 from app.models.decision_record import DecisionRecord
 from app.models.deployment_event import DeploymentEvent
 from app.models.incident_correlation import IncidentCorrelation
+from app.models.learning_note import LearningNote
 from app.models.risk_assessment import RiskAssessment
 from app.models.rollback_assessment import RollbackAssessment
 from app.scoring import score_risk, score_rollback_readiness
@@ -150,6 +151,20 @@ async def correlate_incident(
     return correlations
 
 
+async def add_learning_note(
+    db: AsyncSession,
+    record: DecisionRecord,
+    note: str,
+    author: str | None,
+) -> DecisionRecord:
+    db.add(LearningNote(decision_record_id=record.id, note=note, author=author))
+    await db.commit()
+    detail = await get_record_detail(db, record.id)
+    if detail is None:
+        raise RuntimeError("Updated decision record could not be loaded")
+    return detail
+
+
 async def dashboard_summary(db: AsyncSession) -> dict[str, int]:
     return {
         "decision_records": await _count(db, DecisionRecord),
@@ -208,6 +223,7 @@ def serialize_record(record: DecisionRecord) -> dict[str, Any]:
             serialize_incident(item) for item in record.incident_correlations
         ],
         "approval_evidence": [_serialize_approval(item) for item in record.approval_evidence],
+        "learning_notes": [_serialize_learning_note(item) for item in record.learning_notes],
     }
 
 
@@ -342,6 +358,15 @@ def serialize_incident(incident: IncidentCorrelation) -> dict[str, Any]:
         "environment": incident.environment,
         "severity": incident.severity,
         "confidence": incident.confidence,
+    }
+
+
+def _serialize_learning_note(note: LearningNote) -> dict[str, Any]:
+    return {
+        "id": str(note.id),
+        "note": note.note,
+        "author": note.author,
+        "created_at": note.created_at.isoformat(),
     }
 
 

@@ -157,6 +157,49 @@ def test_pagerduty_webhook_tolerates_null_events(client):
     assert resp.json()["correlated_count"] == 0
 
 
+def test_add_learning_note_appends_to_decision_record(client):
+    record_id = client.post(
+        "/api/v1/decision-records",
+        json={"title": "Migrate cache layer", "environment": "production"},
+    ).json()["id"]
+
+    resp = client.post(
+        f"/api/v1/decision-records/{record_id}/learning-notes",
+        json={"note": "Should have staged the cache warm-up before cutover", "author": "gerard"},
+    )
+
+    assert resp.status_code == 201
+    data = resp.json()
+    assert len(data["learning_notes"]) == 1
+    assert data["learning_notes"][0]["note"] == (
+        "Should have staged the cache warm-up before cutover"
+    )
+    assert data["learning_notes"][0]["author"] == "gerard"
+
+
+def test_add_learning_note_rejects_blank_note(client):
+    record_id = client.post(
+        "/api/v1/decision-records",
+        json={"title": "Migrate cache layer"},
+    ).json()["id"]
+
+    resp = client.post(
+        f"/api/v1/decision-records/{record_id}/learning-notes",
+        json={"note": "   "},
+    )
+
+    assert resp.status_code == 422
+
+
+def test_add_learning_note_missing_record_returns_404(client):
+    resp = client.post(
+        f"/api/v1/decision-records/{uuid.uuid4()}/learning-notes",
+        json={"note": "Postmortem follow-up"},
+    )
+
+    assert resp.status_code == 404
+
+
 def test_generic_incident_webhook_tolerates_malformed_timestamp(client):
     client.post(
         "/api/v1/decision-records",
