@@ -1,5 +1,13 @@
 # Changelog
 
+## v1.3.0 - Learning notes + more null-tolerance fixes
+
+- Added a learning notes endpoint (`POST /api/v1/decision-records/{id}/learning-notes`) so postmortem follow-ups can be attached to a decision record. The `LearningNote` model and table already existed but were never wired to a router or included in the record response; they're now created through the API and returned in `learning_notes` on the decision record detail payload.
+- The GitHub PR parser 500'd when `pull_request`, `repository`, or `head` were sent as explicit `null` instead of omitted.
+- The Terraform plan parser 500'd when `resource_changes` or a `change` block was `null`.
+- The PagerDuty webhook parser 500'd when `events` was `null` instead of omitted or an empty list.
+- The Argo CD ingest endpoint returned a 500 instead of a 404 when `decision_record_id` was not a valid UUID.
+
 ## v1.2.1 - Bugfix release
 
 - Fixed PATCH on decision records: `null` for a nullable field (say, clearing a stale description) was silently dropped instead of clearing it. Explicitly nulling a required field like `title` now returns a 422 instead of attempting a broken write.
