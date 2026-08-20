@@ -111,6 +111,52 @@ def test_argocd_ingestion_tolerates_null_sections(client):
     assert resp.json()["deployment_events"][0]["app_name"] == "search-api"
 
 
+def test_argocd_ingestion_with_malformed_record_id_returns_404(client):
+    resp = client.post(
+        "/api/v1/ingest/argocd",
+        json={"decision_record_id": "not-a-uuid", "app": {}},
+    )
+    assert resp.status_code == 404
+
+
+def test_pagerduty_webhook_correlates_incident(client):
+    record_id = client.post(
+        "/api/v1/decision-records",
+        json={
+            "title": "Scale payment workers",
+            "service_name": "payment-api",
+            "environment": "production",
+        },
+    ).json()["id"]
+
+    resp = client.post(
+        "/api/v1/ingest/pagerduty",
+        json={
+            "events": [
+                {
+                    "event_type": "incident.triggered",
+                    "data": {
+                        "title": "Payment API 5xx spike",
+                        "severity": "critical",
+                        "service": {"summary": "payment-api"},
+                    },
+                }
+            ]
+        },
+    )
+
+    assert resp.status_code == 201
+    data = resp.json()
+    assert data["correlated_count"] == 1
+    assert data["correlations"][0]["decision_record_id"] == record_id
+
+
+def test_pagerduty_webhook_tolerates_null_events(client):
+    resp = client.post("/api/v1/ingest/pagerduty", json={"events": None})
+    assert resp.status_code == 201
+    assert resp.json()["correlated_count"] == 0
+
+
 def test_generic_incident_webhook_tolerates_malformed_timestamp(client):
     client.post(
         "/api/v1/decision-records",

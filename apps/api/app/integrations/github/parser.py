@@ -18,9 +18,9 @@ def parse_pr_event(payload: dict[str, Any]) -> dict[str, Any]:
     Parse a GitHub pull_request webhook payload.
     Returns DecisionRecord-compatible field dict.
     """
-    pr = payload.get("pull_request", {})
-    repo = payload.get("repository", {})
-    head = pr.get("head", {})
+    pr = payload.get("pull_request") or {}
+    repo = payload.get("repository") or {}
+    head = pr.get("head") or {}
     return {
         "title": pr.get("title", ""),
         "description": pr.get("body"),

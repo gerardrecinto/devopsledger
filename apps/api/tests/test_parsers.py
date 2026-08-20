@@ -211,3 +211,37 @@ def test_pagerduty_multiple_events():
 def test_pagerduty_empty_events():
     results = parse_incident_webhook({"events": []})
     assert results == []
+
+
+def test_pagerduty_tolerates_null_events():
+    # PagerDuty notification relays sometimes emit "events": null instead of
+    # omitting the key entirely.
+    results = parse_incident_webhook({"events": None})
+    assert results == []
+
+
+# ── Null-tolerance (malformed webhook payloads) ────────────────────────────────
+
+def test_github_pr_event_tolerates_null_pull_request():
+    result = parse_pr_event({"pull_request": None})
+    assert result["title"] == ""
+    assert result["pr_number"] is None
+
+
+def test_github_pr_event_tolerates_null_head_and_user():
+    result = parse_pr_event({"pull_request": {"head": None, "user": None}})
+    assert result["commit_sha"] is None
+    assert result["author"] is None
+
+
+def test_terraform_tolerates_null_resource_changes():
+    assert parse_plan({"resource_changes": None}) == []
+
+
+def test_terraform_tolerates_null_change_block():
+    plan = {
+        "resource_changes": [
+            {"address": "a", "type": "t", "provider_name": "aws", "change": None},
+        ]
+    }
+    assert parse_plan(plan) == []

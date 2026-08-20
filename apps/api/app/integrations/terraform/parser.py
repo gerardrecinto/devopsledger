@@ -19,8 +19,9 @@ def parse_plan(plan: dict[str, Any]) -> list[dict[str, Any]]:
     Skips no-op and read actions.
     """
     results = []
-    for change in plan.get("resource_changes", []):
-        actions: list[str] = change.get("change", {}).get("actions", [])
+    for change in plan.get("resource_changes") or []:
+        change_block = change.get("change") or {}
+        actions: list[str] = change_block.get("actions") or []
         if not actions or set(actions) <= _SKIP_ACTIONS:
             continue
 
@@ -34,8 +35,8 @@ def parse_plan(plan: dict[str, Any]) -> list[dict[str, Any]]:
                 "resource_type": change.get("type", ""),
                 "provider": provider or None,
                 "actions": actions,
-                "before_summary": _trim(change.get("change", {}).get("before")),
-                "after_summary": _trim(change.get("change", {}).get("after")),
+                "before_summary": _trim(change_block.get("before")),
+                "after_summary": _trim(change_block.get("after")),
             }
         )
     return results

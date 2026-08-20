@@ -102,7 +102,11 @@ async def _record_for_event(
     revision: str | None,
 ) -> DecisionRecord | None:
     if record_id:
-        return await crud.get_record_detail(db, uuid.UUID(record_id))
+        try:
+            parsed_id = uuid.UUID(record_id)
+        except ValueError:
+            return None
+        return await crud.get_record_detail(db, parsed_id)
     if revision:
         result = await db.execute(
             select(DecisionRecord).where(DecisionRecord.commit_sha == revision)

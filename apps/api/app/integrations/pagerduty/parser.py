@@ -14,7 +14,7 @@ def parse_incident_webhook(payload: dict[str, Any]) -> list[dict[str, Any]]:
     Parse a PagerDuty v3 webhook payload (may contain multiple events).
     Returns list of IncidentCorrelation-compatible dicts.
     """
-    events: list[dict[str, Any]] = payload.get("events", [payload])
+    events: list[dict[str, Any]] = payload.get("events") or [payload]
     results = []
     for event in events:
         incident: dict[str, Any] = event.get("data") or event.get("incident") or {}
