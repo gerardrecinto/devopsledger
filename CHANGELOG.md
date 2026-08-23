@@ -1,5 +1,10 @@
 # Changelog
 
+## v1.3.1 - Web dependency CVE fixes
+
+- `npm audit` flagged 6 high-severity CVEs in the web app: brace-expansion (DoS), js-yaml (quadratic CPU consumption), nanoid (infinite loop on bad input), postcss (path traversal via sourceMappingURL), and several Next.js advisories (SSRF, cache confusion, unauthenticated Server Function endpoint disclosure). `npm audit fix` resolved 4 of the 6 without touching package.json, just transitive lockfile bumps.
+- The remaining 2 (sharp's inherited libvips CVEs) only resolve via a Next.js 15 to 16 major bump, which `npm audit fix --force` would do unprompted. Left that alone since a framework major version is a real breaking-change decision, not something to force through a dependency patch release.
+
 ## v1.3.0 - Learning notes + more null-tolerance fixes
 
 - Added a learning notes endpoint (`POST /api/v1/decision-records/{id}/learning-notes`) so postmortem follow-ups can be attached to a decision record. The `LearningNote` model and table already existed but were never wired to a router or included in the record response; they're now created through the API and returned in `learning_notes` on the decision record detail payload.

@@ -1,15 +1,15 @@
 image:
   api:
     repository: ghcr.io/gerardrecinto/devopsledger/api
-    tag: "1.3.0"
+    tag: "1.3.1"
     pullPolicy: IfNotPresent
   web:
     repository: ghcr.io/gerardrecinto/devopsledger/web
-    tag: "1.3.0"
+    tag: "1.3.1"
     pullPolicy: IfNotPresent
   worker:
     repository: ghcr.io/gerardrecinto/devopsledger/worker
-    tag: "1.3.0"
+    tag: "1.3.1"
     pullPolicy: IfNotPresent
 
 api:
