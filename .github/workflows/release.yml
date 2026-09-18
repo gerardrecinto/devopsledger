@@ -84,7 +84,7 @@ jobs:
         run: make package VERSION="v${{ steps.ver.outputs.version }}"
 
       - name: Create GitHub Release
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@v3
         with:
           tag_name: v${{ steps.ver.outputs.version }}
           body_path: dist/devopsledger-v${{ steps.ver.outputs.version }}-demo-package/RELEASE_NOTES.md
