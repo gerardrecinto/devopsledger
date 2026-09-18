@@ -6,7 +6,7 @@ httpx==0.28.1
 pytest==9.0.3
 sqlalchemy[asyncio]==2.0.50
 asyncpg==0.30.0
-alembic==1.14.0
+alembic==1.20.0
 aiosqlite==0.20.0
 pytest-asyncio==1.4.0
 PyYAML==6.0.3
