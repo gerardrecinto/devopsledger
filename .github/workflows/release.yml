@@ -27,7 +27,7 @@ jobs:
           - name: worker
             context: apps/worker
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - name: Resolve version
         id: ver
@@ -72,7 +72,7 @@ jobs:
     runs-on: ubuntu-latest
     needs: release-images
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - name: Resolve version
         id: ver
