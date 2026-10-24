@@ -1,0 +1,302 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>devopsledger: why did this infrastructure change happen</title>
+<meta name="description" content="Paste a pull request and a Terraform plan and get a decision record with risk, rollback readiness and CODEOWNERS approval. The real scorers run in your browser.">
+<meta property="og:title" content="devopsledger">
+<meta property="og:description" content="Paste a pull request and a Terraform plan and get a decision record with risk, rollback readiness and CODEOWNERS approval. The real scorers run in your browser.">
+<meta property="og:type" content="website">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%238b5cf6'/%3E%3Ccircle cx='16' cy='16' r='6' fill='none' stroke='%23fff' stroke-width='3'/%3E%3C/svg%3E">
+<style>
+
+:root{--bg:#f8fafc;--panel:#fff;--panel2:#f1f5f9;--line:#e2e8f0;--fg:#0f172a;--mute:#475569;--brand:#6d28d9;--brand-bg:#ede9fe;--ok:#047857;--ok-bg:#d1fae5;--err:#b91c1c;--err-bg:#fee2e2;--code:#0b1220;--code-fg:#e2e8f0}
+@media (prefers-color-scheme:dark){:root:not([data-theme=light]){--bg:#070d1a;--panel:#0d1526;--panel2:#111c33;--line:#1e2b47;--fg:#e8eefc;--mute:#9fb0cc;--brand:#a78bfa;--brand-bg:#2a1659;--ok:#34d399;--ok-bg:#06382b;--err:#fca5a5;--err-bg:#3b1212}}
+:root[data-theme=dark]{--bg:#070d1a;--panel:#0d1526;--panel2:#111c33;--line:#1e2b47;--fg:#e8eefc;--mute:#9fb0cc;--brand:#a78bfa;--brand-bg:#2a1659;--ok:#34d399;--ok-bg:#06382b;--err:#fca5a5;--err-bg:#3b1212}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--fg);font:16px/1.6 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;-webkit-font-smoothing:antialiased}
+a{color:var(--brand)}
+code,pre,textarea,.mono{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
+.wrap{max-width:1080px;margin:0 auto;padding:0 16px}
+nav{position:sticky;top:0;z-index:5;background:color-mix(in srgb,var(--bg) 88%,transparent);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+nav .wrap{display:flex;align-items:center;justify-content:space-between;height:56px;gap:12px}
+.logo{display:flex;align-items:center;gap:10px;font-weight:700;color:var(--fg);text-decoration:none}
+.logo i{width:22px;height:22px;border-radius:6px;background:#8b5cf6;display:inline-block}
+nav .links{display:flex;gap:18px;align-items:center;font-size:14px}
+nav .links a{color:var(--mute);text-decoration:none}
+nav .links a:hover{color:var(--fg)}
+.btn{display:inline-flex;align-items:center;gap:8px;padding:10px 18px;border-radius:10px;font-weight:600;text-decoration:none;border:1px solid var(--line);color:var(--fg);background:var(--panel);cursor:pointer;font-size:15px}
+.btn.primary{background:#8b5cf6;border-color:#8b5cf6;color:#1a0b3d}
+.btn.primary:hover{background:#a78bfa}
+.btn:focus-visible,textarea:focus-visible,button:focus-visible,a:focus-visible{outline:2px solid #8b5cf6;outline-offset:2px}
+.hero{padding:72px 0 40px;text-align:center}
+.pill{display:inline-block;font-size:13px;color:var(--brand);background:var(--brand-bg);padding:4px 12px;border-radius:99px;margin-bottom:20px;font-weight:600}
+h1{font-size:clamp(34px,6vw,58px);line-height:1.08;margin:0 0 18px;letter-spacing:-.02em}
+h1 em{font-style:normal;color:var(--brand)}
+.lede{max-width:700px;margin:0 auto 28px;color:var(--mute);font-size:18px}
+.cta{display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
+.stats{display:flex;gap:28px;justify-content:center;flex-wrap:wrap;margin-top:36px;color:var(--mute);font-size:14px}
+.stats b{display:block;color:var(--fg);font-size:22px}
+section{padding:56px 0}
+h2{font-size:clamp(26px,4vw,36px);margin:0 0 8px;letter-spacing:-.01em}
+.sub{color:var(--mute);margin:0 0 28px;max-width:720px}
+.lab{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:16px}
+@media (max-width:860px){.lab{grid-template-columns:minmax(0,1fr)}nav .links .hide-s{display:none}}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:14px;overflow:hidden;min-width:0}
+.card h3{margin:0;padding:12px 16px;font-size:13px;letter-spacing:.06em;text-transform:uppercase;color:var(--mute);border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap}
+.tools{display:flex;gap:6px;flex-wrap:wrap}
+.chip{font:600 12px system-ui;padding:5px 10px;border-radius:8px;border:1px solid var(--line);background:var(--panel2);color:var(--fg);cursor:pointer;text-transform:none;letter-spacing:0}
+.chip[aria-pressed=true]{background:var(--brand-bg);border-color:var(--brand);color:var(--brand)}
+#log{display:block;width:100%;height:420px;border:0;padding:12px 14px;font-size:12.5px;line-height:1.55;background:var(--code);color:var(--code-fg);resize:vertical;white-space:pre;overflow:auto}
+.src{display:flex;gap:8px;align-items:center;padding:10px 14px;border-top:1px solid var(--line);font-size:13px;color:var(--mute);flex-wrap:wrap}
+.out{min-height:420px}
+.status{padding:16px;color:var(--mute);font-size:14px}
+.verdict{padding:18px 16px;border-bottom:1px solid var(--line);background:var(--err-bg)}
+.verdict.unknown{background:var(--panel2)}
+.verdict b{display:block;font-size:20px;text-transform:uppercase;letter-spacing:.04em;color:var(--err)}
+.verdict.unknown b{color:var(--mute)}
+.verdict span{font-size:14px;color:var(--mute)}
+.sec{padding:14px 16px;border-bottom:1px solid var(--line)}
+.sec:last-child{border-bottom:0}
+.sec h4{margin:0 0 8px;font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--mute)}
+.bar{height:10px;border-radius:99px;background:var(--panel2);overflow:hidden;max-width:260px;display:inline-block;vertical-align:middle;margin-right:10px;width:60%}
+.bar i{display:block;height:100%;background:#8b5cf6}
+.site{padding:8px 0;border-bottom:1px dashed var(--line);font-size:13.5px}
+.site:last-child{border:0}
+.site code{background:var(--panel2);padding:1px 6px;border-radius:5px;font-size:12px}
+.fix{background:var(--ok-bg);color:var(--ok);padding:10px 12px;border-radius:8px;font-size:14px}
+.note{font-size:13px;color:var(--mute);margin-top:12px}
+.steps{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+@media (max-width:860px){.steps{grid-template-columns:minmax(0,1fr)}}
+.step{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:20px}
+.step .n{width:28px;height:28px;border-radius:8px;background:var(--brand-bg);color:var(--brand);display:grid;place-items:center;font-weight:700;margin-bottom:10px}
+.step h3{margin:0 0 6px;font-size:17px}
+.step p{margin:0;color:var(--mute);font-size:15px}
+.tw{background:var(--panel);border:1px solid var(--line);border-radius:14px;overflow-x:auto;max-width:100%}
+table{width:100%;min-width:560px;border-collapse:collapse;font-size:14px}
+th,td{text-align:left;padding:12px 14px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--mute);background:var(--panel2)}
+tr:last-child td{border-bottom:0}
+td:first-child{font-family:ui-monospace,monospace;font-weight:700;white-space:nowrap}
+.install pre{background:var(--code);color:var(--code-fg);padding:16px;border-radius:12px;overflow-x:auto;font-size:13.5px;margin:0 0 12px}
+.cols2{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:16px}
+@media (max-width:860px){.cols2{grid-template-columns:minmax(0,1fr)}}
+.limits{background:var(--panel);border:1px solid var(--line);border-left:4px solid #f59e0b;border-radius:10px;padding:16px 20px}
+.limits ul{margin:8px 0 0;padding-left:20px;color:var(--mute)}
+footer{border-top:1px solid var(--line);padding:32px 0;color:var(--mute);font-size:14px}
+footer .wrap{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+
+.form{display:grid;gap:0}
+.form .row2{display:grid;grid-template-columns:1fr 1fr;gap:0}
+@media (max-width:560px){.form .row2{grid-template-columns:1fr}}
+.lbl{display:block;padding:8px 14px;font-size:12px;color:var(--mute);background:var(--panel2);border-bottom:1px solid var(--line);border-top:1px solid var(--line)}
+.form input,.form select{width:100%;background:var(--code);color:var(--code-fg);border:0;padding:10px 14px;font-size:13px;font-family:ui-monospace,monospace}
+.form textarea{display:block;width:100%;border:0;padding:12px 14px;font-size:12.5px;line-height:1.55;background:var(--code);color:var(--code-fg);resize:vertical;white-space:pre;overflow:auto;height:150px}
+.form textarea.tall{height:240px}
+.meter{height:12px;border-radius:99px;background:var(--panel2);overflow:hidden}
+.meter i{display:block;height:100%}
+.sev{font:700 12px ui-monospace,monospace;padding:3px 10px;border-radius:6px;text-transform:uppercase}
+.sev.low{background:var(--ok-bg);color:var(--ok)} .sev.medium{background:#fef3c7;color:#92400e} .sev.high{background:#ffedd5;color:#9a3412} .sev.critical{background:var(--err-bg);color:var(--err)}
+@media (prefers-color-scheme:dark){:root:not([data-theme=light]) .sev.medium{background:#3a2a07;color:#fcd34d} :root:not([data-theme=light]) .sev.high{background:#3a1c07;color:#fdba74}}
+.kv{display:grid;grid-template-columns:auto 1fr;gap:6px 14px;font-size:14px}
+.kv dt{color:var(--mute)} .kv dd{margin:0}
+.res{padding:8px 0;border-bottom:1px dashed var(--line);font-size:13.5px}
+.res:last-child{border:0}
+.res code{background:var(--panel2);padding:1px 6px;border-radius:5px;font-size:12px}
+.act{font:700 11px ui-monospace,monospace;padding:2px 7px;border-radius:6px;background:var(--brand-bg);color:var(--brand);margin-right:4px}
+.act.delete,.act.replace{background:var(--err-bg);color:var(--err)}
+ul.why{margin:6px 0 0;padding-left:18px;color:var(--mute);font-size:14px}
+.badge{font:700 11px ui-monospace,monospace;padding:2px 8px;border-radius:6px}
+.badge.ok{background:var(--ok-bg);color:var(--ok)} .badge.bad{background:var(--err-bg);color:var(--err)}
+</style>
+</head>
+<body>
+<nav><div class="wrap">
+  <a class="logo" href="#top"><i></i>devopsledger</a>
+  <div class="links"><a href="#try" class="hide-s">Try it</a><a href="#install" class="hide-s">Install</a><a class="btn" href="https://github.com/gerardrecinto/devopsledger">GitHub</a></div>
+</div></nav>
+
+<header class="hero" id="top"><div class="wrap">
+  <h1>Why did this infrastructure change <em>happen</em>?</h1>
+  <p class="lede">Operational memory for GitOps teams. Every change becomes a decision record: intent, diff, risk, approval, rollback readiness, deployment and what the team learned. Self-hosted, no telemetry.</p>
+  <div class="cta"><a class="btn primary" href="#try">Score a change</a><a class="btn" href="#install">Self-host it</a></div>
+  <div class="stats"><div><b>4</b>integrations in the free edition</div><div><b>0</b>telemetry by default</div><div><b>0</b>uploads from this page</div></div>
+</div></header>
+
+
+<section id="try"><div class="wrap">
+  <h2>Turn one change into a decision record</h2>
+  <p class="sub">Fill in a pull request and a Terraform plan. The real parsers and scorers build the record: what changed, how risky it is, whether rollback is documented, and whether a code owner approved. Everything runs in your browser, and the plan below is a made-up sample.</p>
+  <div class="lab">
+    <div class="card form">
+      <h3><span>The change</span><span class="tools"><button class="chip" id="s-risky" aria-pressed="true">Risky sample</button><button class="chip" id="s-safe" aria-pressed="false">Safer sample</button></span></h3>
+      <div class="row2">
+        <div><label class="lbl" for="title">PR title</label><input id="title"></div>
+        <div><label class="lbl" for="env">Environment</label><select id="env"><option>production</option><option>staging</option><option>dev</option></select></div>
+      </div>
+      <label class="lbl" for="desc">PR description (intent, Jira keys, rollback plan)</label>
+      <textarea id="desc" spellcheck="false" wrap="off"></textarea>
+      <label class="lbl" for="plan">terraform show -json plan</label>
+      <textarea id="plan" class="tall" spellcheck="false" wrap="off"></textarea>
+      <div class="row2">
+        <div><label class="lbl" for="co">CODEOWNERS</label><textarea id="co" style="height:80px" spellcheck="false" wrap="off"></textarea></div>
+        <div><label class="lbl" for="rv">Approving reviewers (comma separated)</label><input id="rv"><label class="lbl" for="files">Changed files (one per line)</label><textarea id="files" style="height:44px" spellcheck="false" wrap="off"></textarea></div>
+      </div>
+    </div>
+    <div class="card" id="rec" aria-live="polite">
+      <h3><span>Decision record</span></h3>
+      <div class="status" id="boot">Loading the scorers (about 10 MB the first time, cached after)...</div>
+    </div>
+  </div>
+  <p class="note">Scores come from the default rule weights, which a YAML file can override in the real service. They rank changes for attention. They are not a safety guarantee.</p>
+</div></section>
+
+<section><div class="wrap">
+  <h2>Why a record, not a dashboard</h2>
+  <p class="sub">Six months later nobody remembers why the database was replaced or who said yes. The record keeps the answer next to the change.</p>
+  <div class="steps">
+    <div class="step"><div class="n">1</div><h3>Capture at the source</h3><p>GitHub PR webhooks, Terraform or OpenTofu plan JSON, Argo CD sync events and PagerDuty or generic incident webhooks feed one record.</p></div>
+    <div class="step"><div class="n">2</div><h3>Score before it ships</h3><p>Rule-based risk from environment, action and resource type. Rollback readiness from whether the PR documents a way back. CODEOWNERS approval checked against reviews.</p></div>
+    <div class="step"><div class="n">3</div><h3>Link what happens after</h3><p>Deployment events, incident correlation and a learning note attach to the same record, so a retro starts from evidence.</p></div>
+  </div>
+</div></section>
+
+<section><div class="wrap">
+  <h2>Self-hosted, no telemetry</h2>
+  <p class="sub">It runs without outbound SaaS calls, works in air-gapped environments after the image pull, and every integration is optional and off by default.</p>
+  <div class="tw"><table><thead><tr><th>Community Edition, free</th><th>Planned, not built</th></tr></thead><tbody>
+    <tr><td>Decision records, GitHub PR and Terraform ingestion, Argo CD and PagerDuty webhooks</td><td>Hosted cloud, team workspaces</td></tr>
+    <tr><td>Risk and rollback scoring, CODEOWNERS checks, incident correlation</td><td>SSO, SCIM, RBAC, SOC 2 exports</td></tr>
+    <tr><td>Docker Compose and Helm chart, dashboard and timeline</td><td>AI-written narratives, enterprise support</td></tr>
+  </tbody></table></div>
+  <p class="note">The README says payments and subscriptions are not implemented. The right column is a roadmap, not a feature list.</p>
+</div></section>
+
+<section id="install" class="install"><div class="wrap">
+  <h2>Run it yourself</h2>
+  <p class="sub">The repo is an MVP in progress. Docker and Postgres required.</p>
+  <div class="cols2">
+    <div>
+<pre>git clone https://github.com/gerardrecinto/devopsledger.git
+cd devopsledger
+cp .env.example .env   # set POSTGRES_PASSWORD
+make up
+# API  http://localhost:8000/health
+# Web  http://localhost:3000</pre>
+    </div>
+    <div>
+<pre>make test-api   # API tests
+make dev        # API with hot reload</pre>
+      <p class="note">Release images are published to <code>ghcr.io/gerardrecinto/devopsledger</code>. See <code>docs/on-prem.md</code> for air-gapped installs.</p>
+    </div>
+  </div>
+</div></section>
+
+<section><div class="wrap">
+  <div class="limits">
+    <strong>What this does not do</strong>
+    <ul>
+      <li>It is not a CI/CD dashboard, a ticketing system or a CMDB.</li>
+      <li>Risk scoring is a weighted rule list, not a model. Tune the weights to your estate.</li>
+      <li>Rollback readiness checks that the description mentions a way back, not that the way back works.</li>
+      <li>This page runs the scoring and parsing only. The database, API and web portal are in the self-hosted package.</li>
+    </ul>
+  </div>
+</div></section>
+
+
+<footer><div class="wrap">
+  <span>devopsledger. MIT licensed. Built by <a href="https://github.com/gerardrecinto">Gerard Recinto</a>.</span>
+  <span><a href="https://github.com/gerardrecinto/devopsledger">Source</a> &middot; <a href="https://github.com/gerardrecinto/devopsledger/releases">Releases</a></span>
+</div></footer>
+<script src="https://cdn.jsdelivr.net/pyodide/v0.26.4/full/pyodide.js"></script>
+<script>
+
+(() => {
+  const FILES = ["app/scoring/__init__.py", "app/scoring/risk.py", "app/scoring/rollback.py", "app/integrations/terraform/parser.py", "app/integrations/github/parser.py"];
+  const $ = (id) => document.getElementById(id);
+  const esc = (s) => String(s == null ? "" : s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+  const PLAN = `{
+  "resource_changes": [
+    {"address": "aws_db_instance.orders", "type": "aws_db_instance", "provider_name": "registry.terraform.io/hashicorp/aws",
+     "change": {"actions": ["delete", "create"], "before": {"allocated_storage": 100, "tags_all": {}}, "after": {"allocated_storage": 200}}},
+    {"address": "aws_security_group.web", "type": "aws_security_group", "provider_name": "registry.terraform.io/hashicorp/aws",
+     "change": {"actions": ["update"], "before": {"ingress": 1}, "after": {"ingress": 2}}},
+    {"address": "aws_s3_bucket.logs", "type": "aws_s3_bucket", "provider_name": "registry.terraform.io/hashicorp/aws",
+     "change": {"actions": ["no-op"], "before": {}, "after": {}}}
+  ]
+}`;
+  const SAMPLES = {
+    risky: { title: "Resize the orders database", env: "production", desc: "Resize the orders RDS instance from 100 GB to 200 GB.\n\nTickets: PLAT-482, DBA-91\nNothing is written down for undoing this yet.", co: "# owners\n*.tf @platform-leads\nmodules/db/* @dba-team", rv: "", files: "infra/db.tf\ninfra/network.tf", plan: PLAN },
+    safe: { title: "Add a log bucket", env: "staging", desc: "Create the logs bucket for the staging stack. PLAT-501\n\nRollback: revert this PR and run terraform apply, the bucket is empty so nothing is lost.", co: "*.tf @platform-leads", rv: "platform-leads", files: "infra/logs.tf",
+      plan: JSON.stringify({ resource_changes: [{ address: "aws_s3_bucket.logs", type: "aws_s3_bucket", provider_name: "registry.terraform.io/hashicorp/aws", change: { actions: ["create"], before: null, after: { bucket: "stg-logs" } } }] }, null, 2) },
+  };
+  let py = null, timer = null;
+  const track = (n) => { try { if (window.plausible) window.plausible(n); } catch (e) {} };
+
+  const PY = `
+import json, sys
+from app.integrations.terraform.parser import parse_plan
+from app.integrations.github.parser import parse_pr_event, check_codeowners_approval, parse_jira_issue_keys
+from app.scoring import score_risk, score_rollback_readiness
+def run(title, env, desc, plan, co, reviewers, files):
+    pr = parse_pr_event({"pull_request": {"title": title, "body": desc, "number": 1, "user": {"login": "author"}}, "repository": {"full_name": "org/infra"}})
+    res = parse_plan(json.loads(plan))
+    risk = score_risk(environment=env, changed_resources=res)
+    rb = score_rollback_readiness(desc)
+    revs = [{"user": {"login": r.strip()}, "state": "APPROVED"} for r in reviewers.split(",") if r.strip()]
+    co_res = check_codeowners_approval([f.strip() for f in files.split("\\n") if f.strip()], co, revs)
+    return json.dumps({"jira": parse_jira_issue_keys(desc), "res": res, "risk": risk, "rb": rb, "co": co_res})
+`;
+
+  function show(r) {
+    if (r.error) { $("rec").innerHTML = '<h3><span>Decision record</span></h3><div class="status" style="color:var(--err)">' + esc(r.error) + "</div>"; return; }
+    const col = { low: "#10b981", medium: "#f59e0b", high: "#f97316", critical: "#ef4444" }[r.risk.severity];
+    const res = r.res.length ? r.res.map((x) => `<div class="res">${x.actions.map((a) => `<span class="act ${a}">${esc(a)}</span>`).join("")}<code>${esc(x.address)}</code> <span style="color:var(--mute)">${esc(x.resource_type)}</span></div>`).join("") : '<div class="note">No changed resources in this plan.</div>';
+    $("rec").innerHTML = `<h3><span>Decision record</span><span class="sev ${r.risk.severity}">${r.risk.severity}</span></h3>
+      <div class="sec"><h4>Risk ${r.risk.score}/100</h4><div class="meter"><i style="width:${r.risk.score}%;background:${col}"></i></div><ul class="why">${r.risk.reasons.map((x) => `<li>${esc(x)}</li>`).join("") || "<li>no risk factors matched</li>"}</ul></div>
+      <div class="sec"><h4>Changed resources</h4>${res}</div>
+      <div class="sec"><h4>Rollback readiness ${r.rb.score}/100</h4>${r.rb.score === 100 ? "A way back is documented in the description." : esc(r.rb.recommendations[0])}</div>
+      <div class="sec"><h4>CODEOWNERS approval</h4>${r.co.required ? `<span class="badge ${r.co.approved ? "ok" : "bad"}">${r.co.approved ? "APPROVED" : "NOT APPROVED"}</span> ${esc(r.co.reason)}${r.co.owner ? `, owner ${esc(r.co.owner)}` : ""}` : '<span class="badge ok">NOT REQUIRED</span> no owner matches the changed files'}</div>
+      <div class="sec"><h4>Linked tickets</h4>${r.jira.length ? r.jira.map((j) => `<code>${esc(j)}</code>`).join(" ") : "none found in the description"}</div>`;
+  }
+  function lint() {
+    if (!py) return;
+    let r;
+    try {
+      py.globals.set("_a", $("title").value); py.globals.set("_b", $("env").value); py.globals.set("_c", $("desc").value);
+      py.globals.set("_d", $("plan").value); py.globals.set("_e", $("co").value); py.globals.set("_f", $("rv").value); py.globals.set("_g", $("files").value);
+      r = JSON.parse(py.runPython("run(_a, _b, _c, _d, _e, _f, _g)"));
+    } catch (e) { const m = String(e.message || e).trim().split("\n").pop(); r = { error: /JSON/i.test(m) ? "The plan is not valid JSON: " + m : m }; }
+    show(r);
+  }
+  function setSample(k) {
+    const s = SAMPLES[k];
+    $("title").value = s.title; $("env").value = s.env; $("desc").value = s.desc; $("plan").value = s.plan; $("co").value = s.co; $("rv").value = s.rv; $("files").value = s.files;
+    $("s-risky").setAttribute("aria-pressed", k === "risky"); $("s-safe").setAttribute("aria-pressed", k === "safe");
+    lint(); track("dl_sample_" + k);
+  }
+  $("s-risky").addEventListener("click", () => setSample("risky"));
+  $("s-safe").addEventListener("click", () => setSample("safe"));
+  ["title", "env", "desc", "plan", "co", "rv", "files"].forEach((id) => $(id).addEventListener("input", () => { clearTimeout(timer); timer = setTimeout(lint, 250); }));
+
+  (async () => {
+    try {
+      py = await loadPyodide();
+      await py.loadPackage("pyyaml");
+      for (const d of ["app/scoring", "app/integrations/terraform", "app/integrations/github"]) py.FS.mkdirTree("/lib/" + d);
+      for (const f of ["app/__init__.py", "app/integrations/__init__.py", "app/integrations/terraform/__init__.py", "app/integrations/github/__init__.py"]) py.FS.writeFile("/lib/" + f, "");
+      await Promise.all(FILES.map(async (f) => { const r = await fetch("py/" + f); if (!r.ok) throw new Error("could not load " + f); py.FS.writeFile("/lib/" + f, await r.text()); }));
+      py.runPython("import sys; sys.path.insert(0, '/lib')");
+      py.runPython(PY);
+      window.__DL_READY__ = true; setSample("risky");
+    } catch (e) { $("boot").textContent = "The in-browser scorer did not load (" + String(e.message || e).split("\n").pop() + "). The self-hosted package runs the same code."; }
+  })();
+})();
+
+</script>
+</body>
+</html>
