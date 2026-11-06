@@ -1,4 +1,4 @@
-# DevOpsLedger - Claude Code Context
+# DevOpsLedger product and development context
 
 ## Product Definition
 
@@ -225,7 +225,6 @@ docs/
   product-strategy.md
   security-model.md
 Makefile
-CLAUDE.md
 .env.example
 ```
 
